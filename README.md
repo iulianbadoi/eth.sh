@@ -4,6 +4,7 @@
 - Written for Ubuntu 16.04 with a Desktop environment (Typical default install)
 - Features automatic power reduction and overclocking of GTX 1060 and GTX 1070 GPUs
 - Installs Nvidia driver if needed
+- Configures nvidia cool-bits xorg config as needed for overclocking
 - Installs latest ethminer with CUDA optimizations 
 - Installs Ethereum package including geth
 - Optionally installs CUDA 8.0 toolkit and sets correct PATH per Nvidia documentation
