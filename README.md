@@ -21,6 +21,10 @@ Options can be added as desired. For verbose mode (lots of output):
 
 `sudo ./eth.sh -v`
 
+To reduce GPU power and overclock with installing anything:
+
+`sudo ./eth.sh -o`
+
 Other options include:
 
 ```-v       enable verbose mode, lots of output
