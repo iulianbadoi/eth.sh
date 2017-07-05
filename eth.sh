@@ -198,7 +198,20 @@
 
     exec 1>&3
     exec 2>&4 
-
+    if [ -e /.driver_complete ] || grep -E "Coolbits.*8" /etc/X11/xorg.conf
+    then
+        :
+    else
+        printf "%s\n" "Generating xorg config with cool-bits enabled"
+        printf "%s\n" "This will require a one time reboot"
+        nvidia-xconfig
+        nvidia-xconfig --cool-bits=8
+        printf "%s\n" "Done...rebooting in 10 seconds"
+        printf "%s\n" "run this command after reboot"
+        sleep 10s
+        systemctl reboot
+    fi    
+        
     
     number_of_gpus="$(nvidia-smi --query-gpu=count --format=csv,noheader,nounits)"
     printf "%s\n" "found $number_of_gpus gpu[s]..."
