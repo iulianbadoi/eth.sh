@@ -22,7 +22,7 @@ Options can be added as desired. For verbose mode (lots of output):
 
 `sudo ./eth.sh -v`
 
-To reduce GPU power and overclock with installing anything:
+To reduce GPU power and overclock with installing anything: (may require reboot if cool-bits are not set)
 
 `sudo ./eth.sh -o`
 
