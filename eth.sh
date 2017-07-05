@@ -1,5 +1,13 @@
 #! /bin/bash
 
+# Create variable of where the progress files should go and create directory if it does not exist
+    progress="/opt/eth"
+
+    if [ ! -d $progress ]
+    then
+        mkdir -p $progress
+    fi
+
 # test for root
 
     if [[ $EUID -ne 0 ]]
@@ -11,12 +19,12 @@
 
 # check for Ubuntu 16.04
 
-    if [ -e .os_check ]
+    if [ -e $progress/os_check ]
     then
         :
     elif [[ "$(uname -v)" =~ .*16.04.* ]]
     then 
-        touch .os_check
+        touch $progress/os_check
     else
         printf "%s\n" "Ubuntu 16.04 not found, exiting..."
         exit 
@@ -29,7 +37,7 @@
     exec 1>/dev/null
     exec 2>/dev/null
 
-    if [ -e .verbose ]
+    if [ -e $progress/verbose ]
     then
         exec 1>&3
         exec 2>&4
@@ -40,30 +48,35 @@
 
     cuda_toolkit=0
     driver_version="nvidia-375"
-    skip_action="false"
+    skip_action=false
+    install=false
+    force_install=false
     
 
     while [ $# -gt 0 ]
     do 
         case $1 in
-        -h)   printf "\n%s\n\n%s\n%s\n%s\n%s\n%s\n\n%s\n\n%s\n\n" "--------- eth.sh help menu ---------" \
+        -h)   printf "\n%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s" "--------- eth.sh help menu ---------" \
               "-v       enable verbose mode, lots of output" \
               "-c       install CUDA 8.0 toolkit, not required for ethminer" \
               "-h       print this menu" \
               "-381     installs Nvidia 381 driver instead of Long Lived 375" \
+              "-f381    forces the install of Nvidia 381 driver" \
               "-o       overclocking only" \
               "example usage:" "sudo eth.sh -v" 1>&3 2>&4
               exit 1
               ;;
         -v)   exec 1>&3
               exec 2>&4
-              touch .verbose
+              touch $progress/verbose
               ;;
-        -o)   skip_action="true"
+        -o)   skip_action=true
               ;;
         -c)   cuda_toolkit=1 
               ;;                      
         -381) driver_version="nvidia-381"
+              ;;
+        -f381) driver_version="nvidia-381" force_install=true
               ;;
         --)   shift
               break
@@ -79,7 +92,7 @@
 # setting up permissions and files for automated second and/or third run
 
     
-    if [ -e .autostart_complete ] || [ "$skip_action" = "true" ]
+    if [ -e $progress/autostart_complete ] || [ "$skip_action" = true ]
     then
         :
     else
@@ -92,7 +105,7 @@
              printf "%s\n%s\n%s\n%s" "[Desktop Entry]" "Name=eth" \
              "Exec=sudo /usr/bin/gnome-terminal -e /usr/local/sbin/eth.sh" \
              "Type=Application" 1>&3 2>&4 > /home/${user_array[0]}/.config/autostart/eth.desktop 
-             touch .autostart_complete
+             touch $progress/autostart_complete
         fi                       
     fi 
     
@@ -102,7 +115,7 @@
 
 # Grabbing materials
 
-    if [ -e .materials_complete ] || [ "$skip_action" = "true" ]
+    if [ -e $progress/materials_complete ] || [ "$skip_action" = true ]
     then
         :
     else
@@ -110,21 +123,24 @@
         add-apt-repository -y "ppa:graphics-drivers/ppa" 
         add-apt-repository -y "ppa:ethereum/ethereum"
         apt-get -y install software-properties-common 
-        mkdir /setupethminer
-        cd /setupethminer
+        mkdir -p $progress/setupethminer
+        cd $progress/setupethminer
         wget "http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_8.0.61-1_amd64.deb" 
         dpkg -i cuda-repo-ubuntu1604_8.0.61-1_amd64.deb 
         wget "https://github.com/ethereum-mining/ethminer/releases/download/v0.11.0rc1/ethminer-0.11.0rc1-Linux.tar.gz" 
         tar -xvzf ethminer-0.11.0rc1-Linux.tar.gz 
         apt-get update 
         printf "%s\n" "Done..." 1>&3 2>&4
-        touch .materials_complete 
+        touch $progress/materials_complete 
     fi
     
 
 # check for Nvidia driver
-
-    if [ -e .driver_complete ] || [ "$skip_action" = "true" ]
+    printf "Force: %s\n" $force_install
+    if [ "$force_install" = true ]
+    then
+        install=true
+    elif [ -e $progress/driver_complete ] || [ "$skip_action" = true ]
     then
         :
     elif nvidia-smi 
@@ -133,12 +149,18 @@
         printf "%s\n" "Generating xorg config with cool-bits enabled" 1>&3 2>&4
         nvidia-xconfig 
         nvidia-xconfig --cool-bits=8 
-        touch .driver_complete
+        touch $progress/driver_complete
         printf "%s\n" "Done, system will reboot in 10 seconds..." 1>&3 2>&4
         printf "%s\n" "This will continue automatically upon reboot..." 1>&3 2>&4           
         sleep 10s
-        systemctl reboot        
+        systemctl reboot     
     else
+        install=true   
+    fi
+
+    printf "Install: %s\n" $install
+    if [ "$install" = true ]
+    then
         printf "%s\n" "Grabbing driver, this may take a while..." 1>&3 2>&4
         apt-get -y install "$driver_version" 
         printf "%s\n" "Done, system will reboot in 10 seconds..." 1>&3 2>&4
@@ -146,11 +168,12 @@
         sleep 10s
         systemctl reboot
     fi
+
             
                       
  # get CUDA 8.0 toolkit
 
-    if [ -e .cuda_toolkit_complete ] || [ "$skip_action" = "true" ]
+    if [ -e $progress/cuda_toolkit_complete ] || [ "$skip_action" = true ]
     then
         :
     elif [ $cuda_toolkit -eq 1 ]
@@ -164,41 +187,41 @@
             apt-get -y install cuda 
             export PATH=/usr/local/cuda-8.0/bin${PATH:+:${PATH}}
             printf "%s\n" "Done..." 1>&3 2>&4
-            touch .cuda_toolkit_complete
+            touch $progress/cuda_toolkit_complete
         fi
     fi
           
 
 # get ethminer
     
-    if [ -e .ethminer_complete ] || [ "$skip_action" = "true" ]
+    if [ -e $progress/ethminer_complete ] || [ "$skip_action" = true ]
     then
          :
     else
         printf "%s\n" "Installing CUDA optimized ethminer" 1>&3 2>&4
-        cp "/setupethminer/bin/ethminer" "/usr/local/sbin/"
+        cp "$progress/setupethminer/bin/ethminer" "/usr/local/sbin/"
         chmod a+x "/usr/local/sbin/ethminer"
-        touch .ethminer_complete
+        touch $progress/ethminer_complete
         printf "%s\n" "ethminer installed..." 1>&3 2>&4
      fi
 
 # install Ethereum
 
-    if [ -e .ethereum_complete ] || [ "$skip_action" = "true" ]
+    if [ -e $progress/ethereum_complete ] || [ "$skip_action" = true ]
     then
         :
     else
         printf "%s\n" "Getting Ethereum..." 1>&3 2>&4
         apt-get -y install ethereum
         printf "%s\n" "Done..." 1>&3 2>&4
-        touch .ethereum_complete 
+        touch $progress/ethereum_complete 
     fi 
 
 # overclocking and reducing power limit on GTX 1060 and GTX 1070
 
     exec 1>&3
     exec 2>&4 
-    if [ -e .driver_complete ] || grep -E "Coolbits.*8" /etc/X11/xorg.conf
+    if [ -e $progress/driver_complete ] || grep -E "Coolbits.*8" /etc/X11/xorg.conf
     then
         :
     else
@@ -244,15 +267,15 @@
 
 # Test for 60 minutes
 
-    if [ -e .test_complete ] || [ "$skip_action" = "true" ]
+    if [ -e $progress/test_complete ] || [ "$skip_action" = true ]
     then
          :
     else
          printf "%s\n" "This is a stability check and donation, it will automatically end after 60 minutes" 
-         touch .test_complete
+         touch $progress/test_complete
          read -d "\0" -a user_array < <(who)
          rm -f /home/${user_array[0]}/.config/autostart/eth.desktop
-         rm -rf /setupethminer
+         rm -rf $progress/setupethminer
          timeout 60m ethminer -U -F "http://eth-us.dwarfpool.com:80/0xf1d9bb42932a0e770949ce6637a0d35e460816b5" 
     fi
 
