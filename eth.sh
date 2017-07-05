@@ -219,8 +219,8 @@
            printf "%s\n" "found GeForce GTX 1070 at index $i..."
            printf "%s\n" "setting persistence mode..."
            nvidia-smi -i $i -pm 1
-           printf "%s\n" "setting power limit to 85 watts.."
-           nvidia-smi -i $i -pl 85
+           printf "%s\n" "setting power limit to 105 watts.."
+           nvidia-smi -i $i -pl 105
            printf "%s\n" "setting memory overclock of 500 Mhz..."
            nvidia-settings -a [gpu:${i}]/GPUMemoryTransferRateOffset[3]=500
        fi 
