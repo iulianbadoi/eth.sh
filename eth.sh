@@ -180,7 +180,7 @@
         if nvcc -V | grep "release 8" 
         then
             printf "%s\n" "CUDA toolkit 8.0 already installed..." 1>&3 2>&4
-            touch .cuda_toolkit_complete
+            touch $progress/cuda_toolkit_complete
         else
             printf "%s\n" "Getting CUDA 8.0 toolkit, this may take a really long time..." 1>&3 2>&4
             apt-get -y install cuda 
