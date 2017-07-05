@@ -136,7 +136,7 @@
     
 
 # check for Nvidia driver
-    printf "Force: %s\n" $force_install
+
     if [ "$force_install" = true ]
     then
         install=true
@@ -158,7 +158,6 @@
         install=true   
     fi
 
-    printf "Install: %s\n" $install
     if [ "$install" = true ]
     then
         printf "%s\n" "Grabbing driver, this may take a while..." 1>&3 2>&4
