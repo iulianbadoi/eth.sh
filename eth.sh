@@ -1,12 +1,5 @@
 #! /bin/bash
 
-# Create variable of where the progress files should go and create directory if it does not exist
-    progress="/opt/eth"
-
-    if [ ! -d $progress ]
-    then
-        mkdir -p $progress
-    fi
 
 # test for root
 
@@ -15,6 +8,7 @@
         printf "%s\n" "This script must be run as root" 
         exit 1
     fi
+
 
 
 # check for Ubuntu 16.04
@@ -28,6 +22,14 @@
     else
         printf "%s\n" "Ubuntu 16.04 not found, exiting..."
         exit 
+    fi
+
+# Create variable of where the progress files should go and create directory if it does not exist
+    progress="/opt/eth"
+
+    if [ ! -d $progress ]
+    then
+        mkdir -p $progress
     fi
 
 # set file descriptors for verbose actions, catch verbose on second pass
