@@ -234,7 +234,7 @@
         systemctl reboot
     fi    
         
-    
+    gpu_name="null"
     number_of_gpus="$(nvidia-smi --query-gpu=count --format=csv,noheader,nounits)"
     printf "%s\n" "found $number_of_gpus gpu[s]..."
     index=$(( number_of_gpus - 1 ))
@@ -242,23 +242,26 @@
     do
        if nvidia-smi -i $i --query-gpu=name --format=csv,noheader,nounits | grep -E "1060" 1> /dev/null
        then
-           printf "%s\n" "found GeForce GTX 1060 at index $i..."
-           printf "%s\n" "setting persistence mode..."
-           nvidia-smi -i $i -pm 1
-           printf "%s\n" "setting power limit to 75 watts.."
-           nvidia-smi -i $i -pl 75
-           printf "%s\n" "setting memory overclock of 500 Mhz..."
-           nvidia-settings -a [gpu:${i}]/GPUMemoryTransferRateOffset[3]=500
+           gpu_name="1060"
+           power_limit=75
+           memory_overclock=500
        elif nvidia-smi -i $i --query-gpu=name --format=csv,noheader,nounits | grep -E "1070" 1> /dev/null
        then 
-           printf "%s\n" "found GeForce GTX 1070 at index $i..."
+           gpu_name="1070"
+           power_limit=95
+           memory_overclock=500
+       fi 
+       
+       if [ "$gpu_name" != "null" ]
+       then
+           printf "%s\n" "found GeForce GTX $gpu_name at index $i..."
            printf "%s\n" "setting persistence mode..."
            nvidia-smi -i $i -pm 1
-           printf "%s\n" "setting power limit to 95 watts.."
-           nvidia-smi -i $i -pl 95
-           printf "%s\n" "setting memory overclock of 500 Mhz..."
-           nvidia-settings -a [gpu:${i}]/GPUMemoryTransferRateOffset[3]=500
-       fi 
+           printf "%s\n" "setting power limit to $power_limit watts.."
+           nvidia-smi -i $i -pl $power_limit
+           printf "%s\n" "setting memory overclock of $memory_overclock Mhz..."
+           nvidia-settings -a [gpu:${i}]/GPUMemoryTransferRateOffset[3]=$memory_overclock
+       fi
     done
            
            
