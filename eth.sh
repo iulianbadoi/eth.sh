@@ -11,12 +11,12 @@
 
 # check for Ubuntu 16.04
 
-    if [ -e /.os_check ]
+    if [ -e .os_check ]
     then
         :
     elif [[ "$(uname -v)" =~ .*16.04.* ]]
     then 
-        touch /.os_check
+        touch .os_check
     else
         printf "%s\n" "Ubuntu 16.04 not found, exiting..."
         exit 
@@ -29,7 +29,7 @@
     exec 1>/dev/null
     exec 2>/dev/null
 
-    if [ -e /.verbose ]
+    if [ -e .verbose ]
     then
         exec 1>&3
         exec 2>&4
@@ -57,7 +57,7 @@
               ;;
         -v)   exec 1>&3
               exec 2>&4
-              touch /.verbose
+              touch .verbose
               ;;
         -o)   skip_action="true"
               ;;
@@ -79,7 +79,7 @@
 # setting up permissions and files for automated second and/or third run
 
     
-    if [ -e /.autostart_complete ] || [ "$skip_action" = "true" ]
+    if [ -e .autostart_complete ] || [ "$skip_action" = "true" ]
     then
         :
     else
@@ -92,7 +92,7 @@
              printf "%s\n%s\n%s\n%s" "[Desktop Entry]" "Name=eth" \
              "Exec=sudo /usr/bin/gnome-terminal -e /usr/local/sbin/eth.sh" \
              "Type=Application" 1>&3 2>&4 > /home/${user_array[0]}/.config/autostart/eth.desktop 
-             touch /.autostart_complete
+             touch .autostart_complete
         fi                       
     fi 
     
@@ -102,7 +102,7 @@
 
 # Grabbing materials
 
-    if [ -e /.materials_complete ] || [ "$skip_action" = "true" ]
+    if [ -e .materials_complete ] || [ "$skip_action" = "true" ]
     then
         :
     else
@@ -118,13 +118,13 @@
         tar -xvzf ethminer-0.11.0rc1-Linux.tar.gz 
         apt-get update 
         printf "%s\n" "Done..." 1>&3 2>&4
-        touch /.materials_complete 
+        touch .materials_complete 
     fi
     
 
 # check for Nvidia driver
 
-    if [ -e /.driver_complete ] || [ "$skip_action" = "true" ]
+    if [ -e .driver_complete ] || [ "$skip_action" = "true" ]
     then
         :
     elif nvidia-smi 
@@ -133,7 +133,7 @@
         printf "%s\n" "Generating xorg config with cool-bits enabled" 1>&3 2>&4
         nvidia-xconfig 
         nvidia-xconfig --cool-bits=8 
-        touch /.driver_complete
+        touch .driver_complete
         printf "%s\n" "Done, system will reboot in 10 seconds..." 1>&3 2>&4
         printf "%s\n" "This will continue automatically upon reboot..." 1>&3 2>&4           
         sleep 10s
@@ -150,7 +150,7 @@
                       
  # get CUDA 8.0 toolkit
 
-    if [ -e /.cuda_toolkit_complete ] || [ "$skip_action" = "true" ]
+    if [ -e .cuda_toolkit_complete ] || [ "$skip_action" = "true" ]
     then
         :
     elif [ $cuda_toolkit -eq 1 ]
@@ -158,47 +158,47 @@
         if nvcc -V | grep "release 8" 
         then
             printf "%s\n" "CUDA toolkit 8.0 already installed..." 1>&3 2>&4
-            touch /.cuda_toolkit_complete
+            touch .cuda_toolkit_complete
         else
             printf "%s\n" "Getting CUDA 8.0 toolkit, this may take a really long time..." 1>&3 2>&4
             apt-get -y install cuda 
             export PATH=/usr/local/cuda-8.0/bin${PATH:+:${PATH}}
             printf "%s\n" "Done..." 1>&3 2>&4
-            touch /.cuda_toolkit_complete
+            touch .cuda_toolkit_complete
         fi
     fi
           
 
 # get ethminer
     
-    if [ -e /.ethminer_complete ] || [ "$skip_action" = "true" ]
+    if [ -e .ethminer_complete ] || [ "$skip_action" = "true" ]
     then
          :
     else
         printf "%s\n" "Installing CUDA optimized ethminer" 1>&3 2>&4
         cp "/setupethminer/bin/ethminer" "/usr/local/sbin/"
         chmod a+x "/usr/local/sbin/ethminer"
-        touch /.ethminer_complete
+        touch .ethminer_complete
         printf "%s\n" "ethminer installed..." 1>&3 2>&4
      fi
 
 # install Ethereum
 
-    if [ -e /.ethereum_complete ] || [ "$skip_action" = "true" ]
+    if [ -e .ethereum_complete ] || [ "$skip_action" = "true" ]
     then
         :
     else
         printf "%s\n" "Getting Ethereum..." 1>&3 2>&4
         apt-get -y install ethereum
         printf "%s\n" "Done..." 1>&3 2>&4
-        touch /.ethereum_complete 
+        touch .ethereum_complete 
     fi 
 
 # overclocking and reducing power limit on GTX 1060 and GTX 1070
 
     exec 1>&3
     exec 2>&4 
-    if [ -e /.driver_complete ] || grep -E "Coolbits.*8" /etc/X11/xorg.conf
+    if [ -e .driver_complete ] || grep -E "Coolbits.*8" /etc/X11/xorg.conf
     then
         :
     else
@@ -244,12 +244,12 @@
 
 # Test for 60 minutes
 
-    if [ -e /.test_complete ] || [ "$skip_action" = "true" ]
+    if [ -e .test_complete ] || [ "$skip_action" = "true" ]
     then
          :
     else
          printf "%s\n" "This is a stability check and donation, it will automatically end after 60 minutes" 
-         touch /.test_complete
+         touch .test_complete
          read -d "\0" -a user_array < <(who)
          rm -f /home/${user_array[0]}/.config/autostart/eth.desktop
          rm -rf /setupethminer
