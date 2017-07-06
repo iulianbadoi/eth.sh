@@ -56,20 +56,13 @@
     address="null"
     pool="eth-us-west1.nanopool.org:9999"
     grid=8192
+    help=false
 
     while getopts "hvocdfa:p:" option
     do
         case "${option}" in
         h)
-            printf "\n%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s" "--------- eth.sh help menu ---------" \
-            "-v       enable verbose mode, lots of output" \
-            "-c       install CUDA 8.0 toolkit, not required for ethminer" \
-            "-h       print this menu" \
-            "-d       installs Nvidia 381 driver instead of Long Lived 375" \
-            "-f       forces the install of Nvidia driver, can be used with -d" \
-            "-o       overclocking only" \
-            "example usage:" "sudo eth.sh -v" 1>&3 2>&4
-            exit 1
+            help=true
             ;;
         v) 
             exec 1>&3
@@ -94,8 +87,24 @@
         p) 
             pool="$OPTARG" >&2
             ;;
+        \?)
+            help=true
+            ;;
         esac
     done
+    
+    if [ $help=true ]
+    then
+        printf "\n%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s" "--------- eth.sh help menu ---------" \
+            "-v       enable verbose mode, lots of output" \
+            "-c       install CUDA 8.0 toolkit, not required for ethminer" \
+            "-h       print this menu" \
+            "-d       installs Nvidia 381 driver instead of Long Lived 375" \
+            "-f       forces the install of Nvidia driver, can be used with -d" \
+            "-o       overclocking only" \
+            "example usage:" "sudo eth.sh -v" 1>&3 2>&4
+        exit 1
+    fi
 
 # setting up permissions and files for automated second and/or third run
 
