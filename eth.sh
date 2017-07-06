@@ -5,11 +5,10 @@
 
     if [[ $EUID -ne 0 ]]
     then
+        
         printf "%s\n" "This script must be run as root" 
         exit 1
     fi
-
-
 
 # check for Ubuntu 16.04
 
@@ -25,6 +24,7 @@
     fi
 
 # Create variable of where the progress files should go and create directory if it does not exist
+
     progress="/opt/eth"
 
     if [ ! -d $progress ]
@@ -45,7 +45,6 @@
         exec 2>&4
     fi 
    
-
 # parsing command line options
 
     cuda_toolkit=0
@@ -95,7 +94,8 @@
     
     if [ $help=true ]
     then
-        printf "\n%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s" "--------- eth.sh help menu ---------" \
+        printf "\n%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n%s\n\n" \
+            "--------- eth.sh help menu ---------" \
             "-v       enable verbose mode, lots of output" \
             "-c       install CUDA 8.0 toolkit, not required for ethminer" \
             "-h       print this menu" \
