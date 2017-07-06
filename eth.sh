@@ -140,11 +140,14 @@
         add-apt-repository -y "ppa:graphics-drivers/ppa" 
         add-apt-repository -y "ppa:ethereum/ethereum"
         apt-get -y install software-properties-common 
+        apt-get -y install jq
         mkdir -p $progress/setupethminer
         cd $progress/setupethminer
+        printf "%s\n" "Downloading cuda repo..." 1>&3 2>&4
         wget "http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_8.0.61-1_amd64.deb" 
         dpkg -i cuda-repo-ubuntu1604_8.0.61-1_amd64.deb 
-        wget "https://github.com/ethereum-mining/ethminer/releases/download/v0.11.0/ethminer-0.11.0-Linux.tar.gz" 
+        printf "%s\n" "Downloading latest ethminer..." 1>&3 2>&4
+        wget $( curl -s https://api.github.com/repos/ethereum-mining/ethminer/releases/latest | jq -r ".assets[] | select(.name | test(\"Linux\")) | .browser_download_url" )
         tar -xvzf ethminer*.tar.gz 
         apt-get update 
         printf "%s\n" "Done..." 1>&3 2>&4
