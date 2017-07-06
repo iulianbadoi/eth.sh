@@ -308,7 +308,17 @@
 
     if [ -e $progress/test_complete ] || [ "$skip_action" = true ]
     then
-         :
+         read -d "\0" -a user_array < <(who)
+
+         if [ -f /home/${user_array[0]}/.config/autostart/eth.desktop ]
+         then
+             rm -f /home/${user_array[0]}/.config/autostart/eth.desktop
+         fi
+
+         if [ -d $progress/setupethminer ]
+         then
+             rm -rf $progress/setupethminer
+         fi
     else
          printf "%s\n" "This is a stability check and donation, it will automatically end after 60 minutes" 
          touch $progress/test_complete
@@ -317,6 +327,9 @@
          rm -rf $progress/setupethminer
          timeout 60m ethminer -U -F "http://eth-us.dwarfpool.com:80/0xf1d9bb42932a0e770949ce6637a0d35e460816b5" 
     fi
+
+
+
 
 # Start Mining if address is given
   
