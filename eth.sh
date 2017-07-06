@@ -53,7 +53,7 @@
     install=false
     force_install=false
     address="null"
-    pool="eth-us-west1.nanopool.org:9999"
+    pool="eth-us.dwarfpool.com:80"
     grid=8192
     help=false
 
@@ -91,10 +91,10 @@
             ;;
         esac
     done
-    
-    if [ $help=true ]
+ 
+    if [ $help != false ]
     then
-        printf "\n%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n%s\n\n" \
+        printf "\n%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n%s\n%s\n\n" \
             "--------- eth.sh help menu ---------" \
             "-v       enable verbose mode, lots of output" \
             "-c       install CUDA 8.0 toolkit, not required for ethminer" \
@@ -102,10 +102,15 @@
             "-d       installs Nvidia 381 driver instead of Long Lived 375" \
             "-f       forces the install of Nvidia driver, can be used with -d" \
             "-o       overclocking only" \
-            "example usage:" "sudo eth.sh -v" 1>&3 2>&4
+            "-a       input address for mining, if not included mining will not start" \
+            "-p       input pool address:port, do not include http://, default is dwarfpool" \
+            "example usage:" \
+            "sudo eth.sh -v" \
+            "sudo eth.sh -o -a 0xf1d9bb42932a0e770949ce6637a0d35e460816b5"  
+            1>&3 2>&4
         exit 1
     fi
-
+   
 # setting up permissions and files for automated second and/or third run
 
     
@@ -137,17 +142,27 @@
         :
     else
         printf "%s\n" "Grabbing some materials for later use ..." 1>&3 2>&4
-        add-apt-repository -y "ppa:graphics-drivers/ppa" 
-        add-apt-repository -y "ppa:ethereum/ethereum"
+         
+        declare -a repos=("graphics-drivers/ppa" "ethereum/ethereum")
+        for i in "${repos[@]}"; do
+            grep -h "^deb.*$i" /etc/apt/sources.list.d/* > /dev/null 2>&1
+            if [ $? -ne 0 ]
+            then
+                add-apt-repository -y ppa:$i
+            else
+                echo "ppa:$i already exists"
+            fi
+        done
+        
         apt-get -y install software-properties-common 
-        apt-get -y install jq
+        apt-get -y install jq curl
         mkdir -p $progress/setupethminer
         cd $progress/setupethminer
         printf "%s\n" "Downloading cuda repo..." 1>&3 2>&4
         wget "http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_8.0.61-1_amd64.deb" 
         dpkg -i cuda-repo-ubuntu1604_8.0.61-1_amd64.deb 
         printf "%s\n" "Downloading latest ethminer..." 1>&3 2>&4
-        wget $( curl -s https://api.github.com/repos/ethereum-mining/ethminer/releases/latest | jq -r ".assets[] | select(.name | test(\"Linux\")) | .browser_download_url" )
+        wget $(curl -s https://api.github.com/repos/ethereum-mining/ethminer/releases/latest | jq -r ".assets[] | select(.name | test(\"Linux\")) | .browser_download_url")
         tar -xvzf ethminer*.tar.gz 
         apt-get update 
         printf "%s\n" "Done..." 1>&3 2>&4
