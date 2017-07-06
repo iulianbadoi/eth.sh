@@ -53,42 +53,48 @@
     skip_action=false
     install=false
     force_install=false
-    
+    address="null"
+    pool="eth-us-west1.nanopool.org:9999"
+    grid=8192
 
-    while [ $# -gt 0 ]
-    do 
-        case $1 in
-        -h)   printf "\n%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s" "--------- eth.sh help menu ---------" \
-              "-v       enable verbose mode, lots of output" \
-              "-c       install CUDA 8.0 toolkit, not required for ethminer" \
-              "-h       print this menu" \
-              "-381     installs Nvidia 381 driver instead of Long Lived 375" \
-              "-f381    forces the install of Nvidia 381 driver" \
-              "-o       overclocking only" \
-              "example usage:" "sudo eth.sh -v" 1>&3 2>&4
-              exit 1
-              ;;
-        -v)   exec 1>&3
-              exec 2>&4
-              touch $progress/verbose
-              ;;
-        -o)   skip_action=true
-              ;;
-        -c)   cuda_toolkit=1 
-              ;;                      
-        -381) driver_version="nvidia-381"
-              ;;
-        -f381) driver_version="nvidia-381" force_install=true
-              ;;
-        --)   shift
-              break
-              ;;           
-        *)    printf "%s\n" "$1: unrecognized option" 1>&3 2>&4
-              exit
-              ;;
+    while getopts "hvocdfa:p:" option
+    do
+        case "${option}" in
+        h)
+            printf "\n%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s" "--------- eth.sh help menu ---------" \
+            "-v       enable verbose mode, lots of output" \
+            "-c       install CUDA 8.0 toolkit, not required for ethminer" \
+            "-h       print this menu" \
+            "-d       installs Nvidia 381 driver instead of Long Lived 375" \
+            "-f       forces the install of Nvidia driver, can be used with -d" \
+            "-o       overclocking only" \
+            "example usage:" "sudo eth.sh -v" 1>&3 2>&4
+            exit 1
+            ;;
+        v) 
+            exec 1>&3
+            exec 2>&4
+            touch $progress/verbose
+            ;;
+        o)  
+            skip_action=true
+            ;;
+        c)  
+            cuda_toolkit=1 
+            ;;                      
+        d) 
+            driver_version="nvidia-381"
+            ;;
+        f) 
+            force_install=true
+            ;;
+        a) 
+            address="$OPTARG" >&2
+            ;;
+        p) 
+            pool="$OPTARG" >&2
+            ;;
         esac
-
-        shift
     done
 
 # setting up permissions and files for automated second and/or third run
@@ -247,11 +253,13 @@
            gpu_name="1060"
            power_limit=75
            memory_overclock=500
+           grid=8192
        elif nvidia-smi -i $i --query-gpu=name --format=csv,noheader,nounits | grep -E "1070" 1> /dev/null
        then 
            gpu_name="1070"
            power_limit=95
            memory_overclock=500
+           grid=16384
        fi 
        
        if [ "$gpu_name" != "null" ]
@@ -283,3 +291,9 @@
          timeout 60m ethminer -U -F "http://eth-us.dwarfpool.com:80/0xf1d9bb42932a0e770949ce6637a0d35e460816b5" 
     fi
 
+# Start Mining if address is given
+  
+   if [ "$address" != "null" ]
+   then
+       ethminer -U --farm-recheck 200 -S "$pool" -O "$address" --cuda-grid-size $grid
+   fi
