@@ -2,12 +2,14 @@
 ## Ubuntu 16.04 LTS Ethereum + ethminer setup script for Nvidia GPUs
 
 ### New in version 1.1
--script now activates auto-login with immediate screensaver lock. This facilitates automated miner startup
- as long as computer has power and secure unattended reboots. 
--if -w <wallet_address> option is used upon install miner will automatically launch upon startup behind locked
- screensaver at any reboot, powerup. [ request from user krtschmr ]
--fixed bug parsing multiple GPU indexes [ thanks to user teflon16 for finding this bug ]
--special thanks to user luigi311 for code suggestions, team is working on integrating suggestions. 
+
+- script now activates auto-login with immediate screensaver lock. This facilitates automated miner startup
+  as long as computer has power and secure unattended reboots. 
+- if -w <wallet_address> option is used upon install miner will automatically launch upon startup behind locked
+  screensaver at any reboot, powerup. [ request from user krtschmr ]
+- fixed bug parsing multiple GPU indexes [ thanks to user teflon16 for finding this bug ]
+- special thanks to user luigi311 for code suggestions, team is working on integrating suggestions. 
+
 
 - Written for Ubuntu 16.04 with a Desktop environment (Typical default install)
 - Features automatic power reduction and overclocking of GTX 1060 and GTX 1070 GPUs
