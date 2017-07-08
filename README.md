@@ -10,6 +10,7 @@
 - fixed bug parsing multiple GPU indexes [ thanks to user teflon16 for finding this bug ]
 - special thanks to user luigi311 for code suggestions, team is working on integrating suggestions. 
 
+# ----------------------------------------------------------------------------------
 
 - Written for Ubuntu 16.04 with a Desktop environment (Typical default install)
 - Features automatic power reduction and overclocking of GTX 1060 and GTX 1070 GPUs
