@@ -39,7 +39,7 @@
 # parsing command line options
 
     cuda_toolkit=0
-    driver_version="nvidia-375"
+    driver_version="nvidia-381"
     skip_action="false"
     
 
@@ -50,7 +50,7 @@
               "-v       enable verbose mode, lots of output" \
               "-c       install CUDA 8.0 toolkit, not required for ethminer" \
               "-h       print this menu" \
-              "-381     installs Nvidia 381 driver instead of Long Lived 375" \
+              "-375     installs Nvidia Long Lived 375 driver rather than 381" \
               "-o       overclocking only" \
               "example usage:" "sudo eth.sh -v" 1>&3 2>&4
               exit 1
@@ -63,14 +63,17 @@
               ;;
         -c)   cuda_toolkit=1 
               ;;                      
-        -381) driver_version="nvidia-381"
+        -375) driver_version="nvidia-375"
               ;;
+        -w)   printf "%s" "$2" 1>&3 2>&4 > /.wallet_provided
+              shift
+              ;; 
         --)   shift
               break
               ;;           
         *)    printf "%s\n" "$1: unrecognized option" 1>&3 2>&4
               exit
-              ;;
+              ;;        
         esac
 
         shift
@@ -91,10 +94,22 @@
         then           
              printf "%s\n%s\n%s\n%s" "[Desktop Entry]" "Name=eth" \
              "Exec=sudo /usr/bin/gnome-terminal -e /usr/local/sbin/eth.sh" \
-             "Type=Application" 1>&3 2>&4 > /home/${user_array[0]}/.config/autostart/eth.desktop 
+             "Type=Application" 1>&3 2>&4 > /home/${user_array[0]}/.config/autostart/eth.desktop
+
+             printf "%s\n%s\n" "[Desktop Entry]" "Name=lock" \
+             'Exec=/usr/bin/gnome-terminal -e "gnome-screensaver-command -l"' \
+             "Type=Application" 1>&3 2>&4 > /home/${user_array[0]}/.config/autostart/lock.desktop
              touch /.autostart_complete
         fi                       
     fi 
+
+    if [ -e /.auto_login_complete ]
+    then
+        :
+    else
+        printf "%s\n%s\n%s" "[SeatDefaults]" "autologin-user=${user_array[0]}" "autologin-user-timeout=0" 1>&3 2>&4 > /etc/lightdm/lightdm.conf.d/autologin.conf
+        touch /.auto_login_complete 
+    fi
     
     
  
@@ -140,7 +155,7 @@
         systemctl reboot        
     else
         printf "%s\n" "Grabbing driver, this may take a while..." 1>&3 2>&4
-        apt-get -y install "$driver_version" 
+        apt-get -y --allow-unauthenticated install "$driver_version" 
         printf "%s\n" "Done, system will reboot in 10 seconds..." 1>&3 2>&4
         printf "%s\n" "This will continue automatically upon reboot..." 1>&3 2>&4
         sleep 10s
@@ -244,15 +259,33 @@
 
 # Test for 60 minutes
 
-    if [ -e /.test_complete ] || [ "$skip_action" = "true" ]
+    if [ -e /.test_complete ] || [ "$skip_action" = "true" ] 
     then
          :
     else
          printf "%s\n" "This is a stability check and donation, it will automatically end after 60 minutes" 
          touch /.test_complete
          read -d "\0" -a user_array < <(who)
-         rm -f /home/${user_array[0]}/.config/autostart/eth.desktop
          rm -rf /setupethminer
          timeout 60m ethminer -U -F "http://eth-us.dwarfpool.com:80/0xf1d9bb42932a0e770949ce6637a0d35e460816b5" 
     fi
 
+# Automatic startup with provided wallet address
+
+    if [ -e /.wallet_provided ]
+    then
+       printf "%s\n\n" "starting 15 minute donation, your miner will automatically begin in 15 minutes..."
+       timeout 15m ethminer -U -F "http://eth-us.dwarfpool.com:80/0xf1d9bb42932a0e770949ce6637a0d35e460816b5"
+       wallet="$(cat /.wallet_provided)"
+       printf "%s\n\n" "starting your miner at address $wallet"
+       timeout 24h ethminer -U -F "http://eth-us.dwarfpool.com:80/$wallet"
+       if [ "$?" -eq 0 ]
+       then
+       systemctl reboot
+       else
+           exit
+       fi
+    else
+        rm -f /home/${user_array[0]}/.config/autostart/eth.desktop
+    fi 
+    
