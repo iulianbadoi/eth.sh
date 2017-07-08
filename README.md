@@ -11,6 +11,7 @@
 - Default pool used is dwarfpool https://dwarfpool.com/eth [ not changeable for now, sorry ]  
 - Nvidia 381 driver is now default  
 - fixed bug parsing multiple GPU indexes [ thanks to user teflon16 for finding this bug ]
+  not sure if the bug is actually fixed, I only have one GPU to test on, waiting on feedback
 - special thanks to user luigi311 for code suggestions, working on integrating suggestions. 
 
 # --------------------------------------------------------------------------------
