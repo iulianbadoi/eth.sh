@@ -198,7 +198,7 @@
 
     exec 1>&3
     exec 2>&4 
-    if [ -e /.driver_complete ] || grep -E "Coolbits.*8" /etc/X11/xorg.conf
+    if [ -e /.driver_complete ] || grep -E "Coolbits.*8" /etc/X11/xorg.conf 1> /dev/null
     then
         :
     else
