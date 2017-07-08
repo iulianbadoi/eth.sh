@@ -36,9 +36,9 @@ On a default clean install of Ubuntu 16.04 LTS, this is typical usage:
 
 `sudo ./eth.sh -w 0xf1d9bb42932a0e770949ce6637a0d35e460816b5`
 
-Options can be added as desired. For verbose mode (lots of output):
+Options can be added as desired. For verbose mode with lots of output [ not recommended, for debugging ]:
 
-`sudo ./eth.sh -v`
+`sudo ./eth.sh -w 0xf1d9bb42932a0e770949ce6637a0d35e460816b5 -v`
 
 To reduce GPU power and overclock with installing anything: (may require reboot if cool-bits are not set)
 
