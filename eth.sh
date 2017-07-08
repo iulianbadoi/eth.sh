@@ -213,9 +213,9 @@
     fi    
         
     
-    number_of_gpus="$(nvidia-smi --query-gpu=count --format=csv,noheader,nounits)"
-    printf "%s\n" "found $number_of_gpus gpu[s]..."
-    index=$(( number_of_gpus - 1 ))
+    read -d "\0" -a number_of_gpus < <(nvidia-smi --query-gpu=count --format=csv,noheader,nounits)
+    printf "%s\n" "found ${number_of_gpus[0]} gpu[s]..."
+    index=$(( number_of_gpus[0] - 1 ))
     for i in $(seq 0 $index)
     do
        if nvidia-smi -i $i --query-gpu=name --format=csv,noheader,nounits | grep -E "1060" 1> /dev/null
