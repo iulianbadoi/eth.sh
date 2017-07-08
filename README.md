@@ -53,7 +53,9 @@ Other options include:
 -375     installs Nvidia 375 driver version rather than 375 
 -o       overclocking only
 ```
-After initial run the script will be installed to your PATH and can be called from anywhere to run overclocking:
+After the script is done installing all steps, it will launch automatically at boot (your account will automatically be logged in and the screen locked. When you log in you will see the miner working in a terminal window. This will make your computer run slow of course. To stop mining at anytime, run `top` or `ps` commands in a separate terminal with apropriate options to kill the ethminer process. 
+
+If you are interested in overclocking only run ./eth.sh -o. Do not install the script. You should see output like the following:
 
 ```
 sudo eth.sh -o
