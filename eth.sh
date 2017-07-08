@@ -103,7 +103,7 @@
         fi                       
     fi 
 
-    if [ -e /.auto_login_complete ]
+    if [ -e /.auto_login_complete ] || [ "$skip_action" = "true" ]
     then
         :
     else
