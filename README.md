@@ -1,6 +1,14 @@
 # eth.sh
 ## Ubuntu 16.04 LTS Ethereum + ethminer setup script for Nvidia GPUs
 
+### New in version 1.1
+-script now activates auto-login with immediate screensaver lock. This facilitates automated miner startup
+ as long as computer has power and secure unattended reboots. 
+-if -w <wallet_address> option is used upon install miner will automatically launch upon startup behind locked
+ screensaver at any reboot, powerup. [ request from user krtschmr ]
+-fixed bug parsing multiple GPU indexes [ thanks to user teflon16 for finding this bug ]
+-special thanks to user luigi311 for code suggestions, team is working on integrating suggestions. 
+
 - Written for Ubuntu 16.04 with a Desktop environment (Typical default install)
 - Features automatic power reduction and overclocking of GTX 1060 and GTX 1070 GPUs
 - Installs Nvidia driver if needed
@@ -14,9 +22,9 @@
 
 ## USAGE
 
-Typical usage (no options). From Desktop open terminal and `cd` to directory with script. Your computer will restart and continue automatically as needed.
+Typical usage for full automation. From Desktop open terminal and `cd` to directory with script. Your computer will restart and continue automatically as needed.
 
-`sudo ./eth.sh`
+`sudo ./eth.sh -w 0xf1d9bb42932a0e770949ce6637a0d35e460816b5`
 
 Options can be added as desired. For verbose mode (lots of output):
 
@@ -30,8 +38,9 @@ Other options include:
 
 ```-v       enable verbose mode, lots of output
 -c       install CUDA 8.0 toolkit, not required for ethminer
+-w       wallet address - this will activate full automation mode
 -h       print this menu
--381     installs Nvidia 381 driver instead of Long Lived 375
+-375     installs Nvidia 375 driver version rather than 375 
 -o       overclocking only
 ```
 After initial run the script will be installed to your PATH and can be called from anywhere to run overclocking:
