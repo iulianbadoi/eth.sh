@@ -6,9 +6,10 @@
 - script now activates auto-login with immediate screensaver lock. This facilitates automated miner startup
   as long as computer has power and secure unattended reboots. 
 - if -w <wallet_address> option is used upon install miner will automatically launch upon startup behind locked
-  screensaver at any reboot, powerup. [ request from user krtschmr ]
+  screensaver at any reboot, powerup. [ request from user krtschmr ]. Miner automatically reboots every 24 hours
+  and resumes. 15 minutes per 24 hours is donated time. 
 - fixed bug parsing multiple GPU indexes [ thanks to user teflon16 for finding this bug ]
-- special thanks to user luigi311 for code suggestions, team is working on integrating suggestions. 
+- special thanks to user luigi311 for code suggestions, working on integrating suggestions. 
 
 # --------------------------------------------------------------------------------
 
