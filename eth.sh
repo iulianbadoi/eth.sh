@@ -10,6 +10,15 @@
         exit 1
     fi
 
+# Create variable of where the progress files should go and create directory if it does not exist
+
+    progress="/opt/eth"
+
+    if [ ! -d $progress ]
+    then
+        mkdir -p $progress
+    fi
+	
 # check for Ubuntu 16.04
 
     if [ -e $progress/os_check ]
@@ -23,14 +32,7 @@
         exit 
     fi
 
-# Create variable of where the progress files should go and create directory if it does not exist
 
-    progress="/opt/eth"
-
-    if [ ! -d $progress ]
-    then
-        mkdir -p $progress
-    fi
 
 # set file descriptors for verbose actions, catch verbose on second pass
 
