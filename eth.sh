@@ -32,8 +32,6 @@
         exit 
     fi
 
-
-
 # set file descriptors for verbose actions, catch verbose on second pass
 
     exec 3>&1
@@ -53,7 +51,6 @@
     driver_version="nvidia-375"
     skip_action=false
     install=false
-    force_install=false
     address="null"
     pool="eth-us.dwarfpool.com:80"
     grid=8192
@@ -80,7 +77,7 @@
             driver_version="nvidia-381"
             ;;
         f) 
-            force_install=true
+            install=true
             ;;
         a) 
             address="$OPTARG" >&2
@@ -174,9 +171,9 @@
 
 # check for Nvidia driver
 
-    if [ "$force_install" = true ]
+    if [ "$install" = true ]
     then
-        install=true
+        :
     elif [ -e $progress/driver_complete ] || [ "$skip_action" = true ]
     then
         :
