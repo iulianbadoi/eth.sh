@@ -14,7 +14,7 @@
   not sure if the bug is actually fixed, I only have one GPU to test on, waiting on feedback
 - special thanks to user luigi311 for code suggestions, working on integrating suggestions. 
 
-# --------------------------------------------------------------------------------
+# -------------------------------------------------------------------------
 
 - Written for Ubuntu 16.04 with a Desktop environment (Typical default install)
 - Features automatic power reduction and overclocking of GTX 1060 and GTX 1070 GPUs
