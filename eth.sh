@@ -53,7 +53,7 @@
     grid=8192
     help=false
 
-    while getopts "hvocdfa:p:" option
+    while getopts "hvocdfw:p:" option
     do
         case "${option}" in
         h)
@@ -76,7 +76,7 @@
         f) 
             install=true
             ;;
-        a) 
+        w) 
             printf "%s" "$OPTARG" 1>&3 2>&4 > $progress/wallet_provided
             ;;
         p) 
@@ -98,7 +98,7 @@
             "-d       installs Nvidia 375 driver instead of latest 381" \
             "-f       forces the install of Nvidia driver, can be used with -d" \
             "-o       overclocking only" \
-            "-a       input address for mining, if not included mining will not start" \
+            "-w       input wallet for mining, if not included mining will not start" \
             "-p       input pool http://address:port, default is dwarfpool" \
             "example usage:" \
             "sudo eth.sh -v" \
@@ -129,12 +129,12 @@
         fi                       
     fi 
 
-    if [ -e /.auto_login_complete ] || [ "$skip_action" = "true" ]
+    if [ -e $progress/auto_login_complete ] || [ "$skip_action" = "true" ]
     then
         :
     else
         printf "%s\n%s\n%s" "[SeatDefaults]" "autologin-user=${user_array[0]}" "autologin-user-timeout=0" 1>&3 2>&4 > /etc/lightdm/lightdm.conf.d/autologin.conf
-        touch /.auto_login_complete 
+        touch $progress/auto_login_complete 
     fi
     
 # Grabbing materials
