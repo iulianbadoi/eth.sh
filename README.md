@@ -50,8 +50,10 @@ Other options include:
 ```-v       enable verbose mode, lots of output
 -c       install CUDA 8.0 toolkit, not required for ethminer
 -w       wallet address - this will activate full automation mode
+-p       pool address - changes the pool to that of your choosing instead of the default pool (dwarfpool)
 -h       print this menu
--375     installs Nvidia 375 driver version rather than 381
+-d       installs Nvidia 375 driver version rather than 381
+-f       forces the driver install even if some nvidia drivers already exist
 -o       overclocking only
 ```
 After the script is done installing all steps, it will launch automatically at boot (your account will automatically be logged in and the screen locked. When you log in you will see the miner working in a terminal window. This will make your computer run slow of course. To stop mining at anytime, run `top` or `ps` commands in a separate terminal with apropriate options to kill the ethminer process. 
