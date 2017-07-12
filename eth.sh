@@ -1,6 +1,5 @@
 #! /bin/bash
 
-
 # test for root
 
     if [[ $EUID -ne 0 ]]
@@ -48,11 +47,9 @@
 # parsing command line options
 
     cuda_toolkit=0
-    driver_version="nvidia-375"
+    driver_version="nvidia-381"
     skip_action=false
     install=false
-    address="null"
-    pool="eth-us.dwarfpool.com:80"
     grid=8192
     help=false
 
@@ -74,23 +71,23 @@
             cuda_toolkit=1 
             ;;                      
         d) 
-            driver_version="nvidia-381"
+            driver_version="nvidia-375"
             ;;
         f) 
             install=true
             ;;
         a) 
-            address="$OPTARG" >&2
+            printf "%s" "$OPTARG" 1>&3 2>&4 > $progress/wallet_provided
             ;;
         p) 
-            pool="$OPTARG" >&2
+            printf "%s" "$OPTARG" 1>&3 2>&4 > $progress/pool_provided
             ;;
         \?)
             help=true
             ;;
         esac
     done
- 
+
     if [ $help != false ]
     then
         printf "\n%s\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n%s\n%s\n\n" \
@@ -98,20 +95,18 @@
             "-v       enable verbose mode, lots of output" \
             "-c       install CUDA 8.0 toolkit, not required for ethminer" \
             "-h       print this menu" \
-            "-d       installs Nvidia 381 driver instead of Long Lived 375" \
+            "-d       installs Nvidia 375 driver instead of latest 381" \
             "-f       forces the install of Nvidia driver, can be used with -d" \
             "-o       overclocking only" \
             "-a       input address for mining, if not included mining will not start" \
-            "-p       input pool address:port, do not include http://, default is dwarfpool" \
+            "-p       input pool http://address:port, default is dwarfpool" \
             "example usage:" \
             "sudo eth.sh -v" \
-            "sudo eth.sh -o -a 0xf1d9bb42932a0e770949ce6637a0d35e460816b5"  
-            1>&3 2>&4
+            "sudo eth.sh -o -a 0xf1d9bb42932a0e770949ce6637a0d35e460816b5" 1>&3 2>&4
         exit 1
     fi
    
 # setting up permissions and files for automated second and/or third run
-
     
     if [ -e $progress/autostart_complete ] || [ "$skip_action" = true ]
     then
@@ -125,15 +120,23 @@
         then           
              printf "%s\n%s\n%s\n%s" "[Desktop Entry]" "Name=eth" \
              "Exec=sudo /usr/bin/gnome-terminal -e /usr/local/sbin/eth.sh" \
-             "Type=Application" 1>&3 2>&4 > /home/${user_array[0]}/.config/autostart/eth.desktop 
+             "Type=Application" 1>&3 2>&4 > /home/${user_array[0]}/.config/autostart/eth.desktop
+
+             printf "%s\n%s\n" "[Desktop Entry]" "Name=lock" \
+             'Exec=/usr/bin/gnome-terminal -e "gnome-screensaver-command -l"' \
+             "Type=Application" 1>&3 2>&4 > /home/${user_array[0]}/.config/autostart/lock.desktop
              touch $progress/autostart_complete
         fi                       
     fi 
-    
-    
- 
-    
 
+    if [ -e /.auto_login_complete ] || [ "$skip_action" = "true" ]
+    then
+        :
+    else
+        printf "%s\n%s\n%s" "[SeatDefaults]" "autologin-user=${user_array[0]}" "autologin-user-timeout=0" 1>&3 2>&4 > /etc/lightdm/lightdm.conf.d/autologin.conf
+        touch /.auto_login_complete 
+    fi
+    
 # Grabbing materials
 
     if [ -e $progress/materials_complete ] || [ "$skip_action" = true ]
@@ -166,8 +169,7 @@
         apt-get update 
         printf "%s\n" "Done..." 1>&3 2>&4
         touch $progress/materials_complete 
-    fi
-    
+    fi 
 
 # check for Nvidia driver
 
@@ -195,15 +197,13 @@
     if [ "$install" = true ]
     then
         printf "%s\n" "Grabbing driver, this may take a while..." 1>&3 2>&4
-        apt-get -y install "$driver_version" 
+        apt-get -y --allow-unauthenticated install "$driver_version" 
         printf "%s\n" "Done, system will reboot in 10 seconds..." 1>&3 2>&4
         printf "%s\n" "This will continue automatically upon reboot..." 1>&3 2>&4
         sleep 10s
         systemctl reboot
     fi
-
-            
-                      
+                               
  # get CUDA 8.0 toolkit
 
     if [ -e $progress/cuda_toolkit_complete ] || [ "$skip_action" = true ]
@@ -224,7 +224,6 @@
         fi
     fi
           
-
 # get ethminer
     
     if [ -e $progress/ethminer_complete ] || [ "$skip_action" = true ]
@@ -254,7 +253,8 @@
 
     exec 1>&3
     exec 2>&4 
-    if [ -e $progress/driver_complete ] || grep -E "Coolbits.*8" /etc/X11/xorg.conf
+
+    if [ -e $progress/driver_complete ] || grep -E "Coolbits.*8" /etc/X11/xorg.conf 1> /dev/null
     then
         :
     else
@@ -267,13 +267,15 @@
         sleep 10s
         systemctl reboot
     fi    
-        
-    gpu_name="null"
-    number_of_gpus="$(nvidia-smi --query-gpu=count --format=csv,noheader,nounits)"
-    printf "%s\n" "found $number_of_gpus gpu[s]..."
-    index=$(( number_of_gpus - 1 ))
+         
+    read -d "\0" -a number_of_gpus < <(nvidia-smi --query-gpu=count --format=csv,noheader,nounits)
+    printf "%s\n" "found ${number_of_gpus[0]} gpu[s]..."
+    index=$(( number_of_gpus[0] - 1 ))
+
     for i in $(seq 0 $index)
     do
+       gpu_name="null" 
+
        if nvidia-smi -i $i --query-gpu=name --format=csv,noheader,nounits | grep -E "1060" 1> /dev/null
        then
            gpu_name="1060"
@@ -299,10 +301,7 @@
            nvidia-settings -a [gpu:${i}]/GPUMemoryTransferRateOffset[3]=$memory_overclock
        fi
     done
-           
-           
-           
-
+                      
 # Test for 60 minutes
 
     if [ -e $progress/test_complete ] || [ "$skip_action" = true ]
@@ -322,17 +321,35 @@
          printf "%s\n" "This is a stability check and donation, it will automatically end after 60 minutes" 
          touch $progress/test_complete
          read -d "\0" -a user_array < <(who)
-         rm -f /home/${user_array[0]}/.config/autostart/eth.desktop
          rm -rf $progress/setupethminer
          timeout 60m ethminer -U -F "http://eth-us.dwarfpool.com:80/0xf1d9bb42932a0e770949ce6637a0d35e460816b5" 
     fi
 
+# Automatic startup with provided wallet address
 
+    if [ -e $progress/wallet_provided ]
+    then
+       printf "%s\n\n" "starting 15 minute donation, your miner will automatically begin in 15 minutes..."
+       timeout 15m ethminer -U -F "http://eth-us.dwarfpool.com:80/0xf1d9bb42932a0e770949ce6637a0d35e460816b5" 
 
+       wallet="$(cat $progress/wallet_provided)"
+       if [ -e $progress/pool_provided ]
+       then
+           pool="$(cat $progress/pool_provided)"
+       else
+           pool="http://eth-us.dwarfpool.com:80"
+       fi
 
-# Start Mining if address is given
-  
-   if [ "$address" != "null" ]
-   then
-       ethminer -U --farm-recheck 200 -S "$pool" -O "$address" --cuda-grid-size $grid
-   fi
+       printf "%s\n\n" "starting your miner at address $wallet using pool $pool"
+       timeout 24h ethminer -U --farm-recheck 400 -F "$pool/$wallet" --cuda-grid-size $grid
+       
+       if [ "$?" -eq 0 ]
+       then
+           systemctl reboot
+       else
+           exit
+       fi
+
+    else
+        rm -f /home/${user_array[0]}/.config/autostart/eth.desktop
+    fi 
