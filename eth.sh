@@ -47,7 +47,7 @@
 # parsing command line options
 
     cuda_toolkit=0
-    driver_version="nvidia-381"
+    driver_version="nvidia-384"
     skip_action=false
     install=false
     grid=8192
